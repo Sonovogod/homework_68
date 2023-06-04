@@ -12,10 +12,12 @@ namespace CountriesInformer.Controllers;
 public class CountriesController : Controller
 {
     private readonly ICountryService _countryService;
+    private readonly ILogger<CountriesController> _logger;
 
-    public CountriesController(ICountryService countryService)
+    public CountriesController(ICountryService countryService, ILogger<CountriesController> logger)
     {
         _countryService = countryService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -33,6 +35,8 @@ public class CountriesController : Controller
         }
         catch (Exception e)
         {
+            _logger.LogTrace(e.StackTrace);
+            _logger.LogError("CountriesController | Get all countries error: {Message}", e.Message);
             var response = new ResponseDto<List<CountryDto>>
             {
                 Status = new Status
@@ -48,14 +52,21 @@ public class CountriesController : Controller
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int? id)
     {
+        _logger.LogInformation("CountriesController | Input data id: {Id}", id);
         try
         {
             if (id is null)
+            {
+                _logger.LogInformation("CountriesController | id is null");
                 throw new Exception("Передан пустой Id");
-            
+            }
+
             CountryDto? model = await _countryService.GetById(id);
             if (model is null)
+            {
+                _logger.LogInformation("CountriesController | Country is not found");
                 throw new Exception("Страна по такому Id не найдена");
+            }
             
             var response = new ResponseDto<CountryDto>
             {
@@ -66,6 +77,8 @@ public class CountriesController : Controller
         }
         catch (Exception e)
         {
+            _logger.LogTrace(e.StackTrace);
+            _logger.LogError("CountriesController | Get country by id error: {Message}", e.Message);
             var response = new ResponseDto<CountryDto>
             {
                 Status = new Status
@@ -83,12 +96,19 @@ public class CountriesController : Controller
     {
         try
         {
+            _logger.LogInformation("CountriesController | Get country by name input data: {Name}", name);
             if (string.IsNullOrEmpty(name))
+            {
+                _logger.LogError("CountriesController | Get countries by name error: input data is null or empty");
                 throw new Exception("Передано пустое название");
+            }
             
             CountryDto? model = await _countryService.GetByName(name);
             if (model is null)
+            {
+                _logger.LogError("CountriesController | Get countries by name error: not found");
                 throw new Exception("Страна по такому названию не найдена");
+            }
             
             var response = new ResponseDto<CountryDto>
             {
@@ -99,6 +119,8 @@ public class CountriesController : Controller
         }
         catch (Exception e)
         {
+            _logger.LogTrace(e.StackTrace);
+            _logger.LogError("CountriesController | Get country by name error: {Message}", e.Message);
             var response = new ResponseDto<CountryDto>
             {
                 Status = new Status
@@ -116,6 +138,7 @@ public class CountriesController : Controller
     {
         try
         {
+            _logger.LogInformation("CountriesController | Put update country: {Id}/{Name}/{City}/{Language}", countryDto.Id, countryDto.Name, countryDto.CapitalCity, countryDto.OfficialLanguage);
             ValidationResult? result = _countryService.DataValidation(countryDto);
             if (result is { IsValid: true })
             {
@@ -132,7 +155,7 @@ public class CountriesController : Controller
                     };
                     return Ok(response);
                 }
-                
+                _logger.LogWarning("CountriesController | Data in not updated error in the _countryService");
                 var warningResponse = new ResponseDto<CountryDto>
                 {
                     Status = new Status
@@ -145,13 +168,17 @@ public class CountriesController : Controller
             }
 
             if (result is null)
+            {
+                _logger.LogError("CountriesController | Put valid result is null");
                 throw new Exception("Некорректные данные");
+            }
             string error = string.Join('/', result.Errors);
                 throw new Exception($"{error}");
         
         }
         catch (Exception e)
         {
+            _logger.LogError("CountriesController | Put country error: {Message}", e.Message);
             var errorResponse = new ResponseDto<CountryDto>
             {
                 Status = new Status
@@ -170,6 +197,7 @@ public class CountriesController : Controller
     {
         try
         {
+            _logger.LogInformation("CountriesController | Post create country: {Name}/{City}/{Language}", countryDto.Name, countryDto.CapitalCity, countryDto.OfficialLanguage);
             ValidationResult? result = _countryService.CreateValidation(countryDto);
             if (result is { IsValid: true })
             {
@@ -186,7 +214,7 @@ public class CountriesController : Controller
                     };
                     return Ok(response);
                 }
-                
+                _logger.LogWarning("CountriesController | Data in not added error in the _countryService");
                 var warningResponse = new ResponseDto<CountryDto>
                 {
                     Status = new Status
@@ -199,13 +227,17 @@ public class CountriesController : Controller
             }
 
             if (result is null)
+            {
+                _logger.LogError("CountriesController | Post valid result is null");
                 throw new Exception("Некорректные данные");
+            }
             string error = string.Join('/', result.Errors);
             throw new Exception($"{error}");
         
         }
         catch (Exception e)
         {
+            _logger.LogError("CountriesController | Post add country error: {Message}", e.Message);
             var errorResponse = new ResponseDto<CountryDto>
             {
                 Status = new Status
@@ -225,8 +257,12 @@ public class CountriesController : Controller
     {
         try
         {
+            _logger.LogInformation("CountriesController | Delete input data id: {Id}", id);
             if (id is null)
+            {
+                _logger.LogError("CountriesController | Delete country id is null ");
                 throw new Exception("Передан пустой Id");
+            }
             
             bool deleteResult = await _countryService.DeleteById(id);
             if (deleteResult)
@@ -241,7 +277,8 @@ public class CountriesController : Controller
                 };
                 return Ok(response);
             }
-                
+            
+            _logger.LogInformation("CountriesController | Delete input data id error / not founded: {Id}", id);
             var errorResponse = new ResponseDto<CountryDto>
             {
                 Status = new Status
@@ -255,6 +292,7 @@ public class CountriesController : Controller
         }
         catch (Exception e)
         {
+            _logger.LogError("CountriesController | Delete country error: {Message}", e.Message);
             var errorResponse = new ResponseDto<CountryDto>
             {
                 Status = new Status

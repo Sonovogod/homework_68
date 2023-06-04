@@ -1,4 +1,3 @@
-using CountriesInformer.DTO;
 using CountriesInformer.Models;
 using CountriesInformer.Services;
 using CountriesInformer.Services.Abstracts;
