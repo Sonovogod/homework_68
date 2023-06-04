@@ -93,4 +93,24 @@ public class CountryService : ICountryService
         var result = _createValidator.Validate(countryDto);
         return result;
     }
+
+    public async Task<bool> DeleteById(int? id)
+    {
+        try
+        {
+            Country? country = await _db.Countries.FirstOrDefaultAsync(x => x.Id == id);
+            if (country is not null)
+            {
+                _db.Countries.Remove(country);
+                await _db.SaveChangesAsync();
+            
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return false;
+    }
 }

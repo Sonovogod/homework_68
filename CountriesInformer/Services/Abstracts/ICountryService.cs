@@ -12,4 +12,5 @@ public interface ICountryService
     Task<bool> Update(CountryDto countryDto);
     Task<bool> Add(CreateCountryDto countryDto);
     ValidationResult CreateValidation(CreateCountryDto countryDto);
+    Task<bool> DeleteById(int? id);
 }

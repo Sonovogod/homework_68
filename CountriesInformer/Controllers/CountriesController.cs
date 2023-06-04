@@ -4,7 +4,6 @@ using CountriesInformer.Models;
 using CountriesInformer.Services.Abstracts;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 
 namespace CountriesInformer.Controllers;
 
@@ -127,7 +126,8 @@ public class CountriesController : Controller
                     {
                         Status = new Status
                         {
-                            StatusCode = CustomStatusCode.Success
+                            StatusCode = CustomStatusCode.Success,
+                            Message = "Данные успешно обновлены"
                         }
                     };
                     return Ok(response);
@@ -180,7 +180,8 @@ public class CountriesController : Controller
                     {
                         Status = new Status
                         {
-                            StatusCode = CustomStatusCode.Success
+                            StatusCode = CustomStatusCode.Success,
+                            Message = "Данные успешно добавлены"
                         }
                     };
                     return Ok(response);
@@ -202,6 +203,55 @@ public class CountriesController : Controller
             string error = string.Join('/', result.Errors);
             throw new Exception($"{error}");
         
+        }
+        catch (Exception e)
+        {
+            var errorResponse = new ResponseDto<CountryDto>
+            {
+                Status = new Status
+                {
+                    StatusCode = CustomStatusCode.Error,
+                    Message = $"{e.Message}"
+                }
+            };
+            return Ok(errorResponse);
+        }
+        
+    }
+    
+    
+    [HttpDelete]
+    public async Task<IActionResult> Delete(int? id)
+    {
+        try
+        {
+            if (id is null)
+                throw new Exception("Передан пустой Id");
+            
+            bool deleteResult = await _countryService.DeleteById(id);
+            if (deleteResult)
+            {
+                var response = new ResponseDto<CountryDto>
+                {
+                    Status = new Status
+                    {
+                        StatusCode = CustomStatusCode.Success,
+                        Message = "Страна удалена"
+                    }
+                };
+                return Ok(response);
+            }
+                
+            var errorResponse = new ResponseDto<CountryDto>
+            {
+                Status = new Status
+                {
+                    StatusCode = CustomStatusCode.Error,
+                    Message = "Страна по указанному Id не была удалена"
+                }
+            };
+            return Ok(errorResponse);
+
         }
         catch (Exception e)
         {
