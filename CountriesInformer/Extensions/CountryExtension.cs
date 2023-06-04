@@ -27,4 +27,24 @@ public static class CountryExtension
             OfficialLanguage = model.OfficialLanguage
         };
     }
+    
+    public static Country MapToCountryModel(this Country updatedModel, CountryDto model)
+    {
+        updatedModel.Id = model.Id;
+        updatedModel.Name = model.Name;
+        updatedModel.CapitalCity = model.CapitalCity;
+        updatedModel.OfficialLanguage = model.OfficialLanguage;
+        
+        return updatedModel;
+    }
+    
+    public static Country MapToCountryModel(this CreateCountryDto model)
+    {
+        return new Country()
+        {
+            Name = model.Name,
+            CapitalCity = model.CapitalCity,
+            OfficialLanguage = model.OfficialLanguage
+        };
+    }
 }

@@ -1,6 +1,8 @@
+using CountriesInformer.DTO;
 using CountriesInformer.Models;
 using CountriesInformer.Services;
 using CountriesInformer.Services.Abstracts;
+using CountriesInformer.Validations;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<CountryDtoValidator>();
+builder.Services.AddScoped<CreateCountryDtoValidator>();
 
 var app = builder.Build();
 
